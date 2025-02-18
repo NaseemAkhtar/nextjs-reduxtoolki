@@ -19,7 +19,7 @@ export default async function Login(){
                 <LoginForm/>
             </CardContent>
             <CardFooter className="flex flex-col gap-1">
-                <Link href="/signup">Don't have an account? Signup</Link>
+                <Link href={"/signup"}>Don't have an account? Signup</Link>
             </CardFooter>
         </Card>
     </div>

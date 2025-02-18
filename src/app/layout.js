@@ -1,5 +1,12 @@
 import localFont from "next/font/local";
 import "./globals.css";
+// import dynamic from 'next/dynamic';
+import AuthProvider from "@/lib/authProvider";
+import { Header } from "@/components/header";
+import Providers from "@/providers";
+import Footer from "@/components/footer";
+
+// const Header =  React.lazy(() => import('@/components/header'));
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,9 +28,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased black-bg`}
       >
-        {children}
+        <AuthProvider>
+          <Providers>
+            <Header />
+            {children}
+            <Footer/>
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );

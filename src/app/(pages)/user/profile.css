@@ -1,0 +1,14 @@
+.user_banner {
+    position: relative;
+    
+}
+.user_profile{
+    max-width: 750px;
+    background: rgba(0,0,0,0.8);
+    padding: 15px;
+    margin: auto;
+    color: #fff;
+    position: absolute;
+    border-radius: 6px;
+    inset: 15px 0px;
+}

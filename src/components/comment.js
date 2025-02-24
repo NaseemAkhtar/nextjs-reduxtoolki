@@ -33,7 +33,7 @@ console.log(session,'blogData comm', comments)
                 'Authorization': `Bearer ${session?.user?.accessToken}`
             }
         })
-        console.log('like res...', res?.data?.data?.likes)
+        console.log('like res...', res?.data?.data)
         setLikes(res?.data?.data?.likes)
     }
 

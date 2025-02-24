@@ -28,7 +28,7 @@ export async function PUT(req, res){
         }
         
         await blog.save()
-
+        
         return NextResponse.json({
             message: "Like updated!",
             data: blog

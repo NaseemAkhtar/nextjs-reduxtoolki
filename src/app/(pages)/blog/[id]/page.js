@@ -55,7 +55,6 @@ export default async function Blog({params}){
                             alt="Avatar"
                             height={30}
                             width={30}
-                            sizes="100vw"
                             className="w-10 h-10 rounded-full cursor-pointer"
                         />
                         <div className="text-xs">

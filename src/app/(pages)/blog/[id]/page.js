@@ -18,7 +18,7 @@ const fetchBlog = async (id="")=>{
     try{
         await store.dispatch(fetchblog(id))
         const getState = store.getState()
-        console.log('getState state....', getState)
+        
         // const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`)
         return  getState?.blogData?.blog//response?.data?.data
     } catch(err){
@@ -31,6 +31,8 @@ export default async function Blog({params}){
 
     let blog = await fetchBlog(params?.id) || {}
     if(Object.keys(blog).length === 0) return null
+
+    console.log('Blog data....', blog)
 
     return(<div className="container">
         <section className="">
@@ -49,7 +51,7 @@ export default async function Blog({params}){
                     
                     <div className="author flex flex-row justify-center gap-3">
                         <Image 
-                            src={avatar}
+                            src={blog?.authorId?.avatar?.url || avatar}
                             alt="Avatar"
                             height={30}
                             width={30}

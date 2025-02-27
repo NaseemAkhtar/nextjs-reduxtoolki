@@ -60,12 +60,11 @@ console.log('session header? state', user, userLoading)
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                     <Image 
-                                    src={user?.avatar?.url || avatar}
-                                    alt="Avatar"
-                                    height={40}
-                                    width={40}
-                                    sizes="100vw"
-                                    className="w-10 h-10 rounded-full cursor-pointer"
+                                        src={user?.avatar?.url || avatar}
+                                        alt="Avatar"
+                                        height={40}
+                                        width={40}
+                                        className="w-10 h-10 rounded-full cursor-pointer"
                                 />
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-56">

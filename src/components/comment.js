@@ -55,11 +55,10 @@ console.log(session,'blogData comm', comments)
                 }
             })
 
-            
             if (res?.status === 201) {
                 setSuccess("Blog Addes successfully!");
-                console.log('comment response....', res?.data?.data)
-                setComments(res?.data?.data?.comments)
+                setComments(prev => [...prev, res?.data?.data])
+                setCommentText("")
             } else {
                 setError(res?.data?.message || "An unexpected error occurred.");
             }
@@ -173,7 +172,7 @@ console.log(session,'blogData comm', comments)
                 {comments?.map((comment) => (
                 <div key={comment._id} className="flex gap-3 py-5 items-center">
                     <Image
-                    src={comment?.user?.avatar?.url ? comment?.user?.avatar?.url : avatar}
+                    src={comment?.user?.avatar?.url || avatar}
                     alt="avatar image"
                     width={40}
                     height={40}
@@ -182,7 +181,7 @@ console.log(session,'blogData comm', comments)
 
                     <div>
                     <p className="text-whiteColor">{comment?.user?.name}</p>
-                    <p>{comment.text}</p>
+                    <p className="text-sm text-light">{comment.text}</p>
                     </div>
 
                     {session?.user?._id === comment?.user?._id && (

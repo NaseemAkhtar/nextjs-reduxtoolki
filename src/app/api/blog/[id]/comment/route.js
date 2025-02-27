@@ -20,19 +20,19 @@ export async function POST(req, res){
         const body = await req.json()
         const blog = await Blog.findById(id)
         const user = await User.findById(verifyToken?._id).select("-password")
-console.log('usrrrrrr????', user)
         const newComment = {
             text: body?.text,
             user
         }
         blog.comments.push(newComment)
-
-        console.log("verifyToken.....new", newComment)
+        
         await blog.save()
+        
+        // console.log("verifyToken.....new...", blog?.comments?.at(-1))
 
         return NextResponse.json({
             message: "Comment created successfully!",
-            data: blog
+            data: blog?.comments?.at(-1)
         },{status: 201})
 
     }catch(err){

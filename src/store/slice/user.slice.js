@@ -51,7 +51,7 @@ export const fetchUser = (data)=>{
         dispatch(loading(false))
         await userRepo(data)
        .then(response=>{
-        console.log('slice data???', data, response)
+        console.log('slice data???new', response?.data?.data)
         dispatch(getUserData(response.data?.data))
        })
        .catch(err=>{

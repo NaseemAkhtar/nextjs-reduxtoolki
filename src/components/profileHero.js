@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import EditProfilePopup from "@/components/editProfilePopup"
 
 export default function UserProfile({userData}){
-    console.log('userData??? new',userData?.user?.avatar)
+    console.log('userData??? new',userData)
     return(<>
         <section className="user_banner w-full">
             <AspectRatio ratio={18 / 4}>
@@ -25,7 +25,14 @@ export default function UserProfile({userData}){
             <div className="user_profile flex flex-col items-center">
                 <div className="flex flex-row">
                     <Avatar className="w-[60px] h-[60px]">
-                        <AvatarImage src={`${userData?.user?.avatar?.url || "https://github.com/shadcn.png"}`} />
+                        <Image
+                            src={`${userData?.user?.avatar?.url || "https://github.com/shadcn.png"}`}
+                            alt="avatar image"
+                            width={60}
+                            height={60}
+                            className="rounded-md"
+                        />
+                        {/* <AvatarImage src={`${userData?.user?.avatar?.url || "https://github.com/shadcn.png"}`} /> */}
                         <AvatarFallback>{userData?.user?.name}</AvatarFallback>
                     </Avatar>
                     <EditProfilePopup user={userData}/>

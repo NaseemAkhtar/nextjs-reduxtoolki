@@ -27,10 +27,11 @@ export default async function Profile(){
                 store.dispatch(fetchUser(session)),
                 store.dispatch(fetchblogList({userId:session?.user?._id}))
             ])
-
+            
             const reduxState = await store.getState()
             userData = reduxState?.userData
             blogData = reduxState?.blogData
+            console.log('reduxState????....new', {userData})
             
         }
     } catch(err){

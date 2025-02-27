@@ -97,7 +97,7 @@ const userSlice = createSlice({
 
 export const {
     loading, getBlogData, blogError,
-    userBloglistLoading, userBloglistData, userBlog,
+    userBloglistLoading, userBloglistData, userBloglistError,
     allBlogLoading, allBlogs, allBlogError
 } = userSlice.actions
 
@@ -124,7 +124,7 @@ export const fetchblogList = (params)=>{
         dispatch(userBloglistData(response?.data?.data))
        })
        .catch(err=>{
-            dispatch(userBlog(err.message))
+            dispatch(userBloglistError(err.message))
        })
     }
 }

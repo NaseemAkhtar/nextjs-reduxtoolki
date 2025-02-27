@@ -25,14 +25,14 @@ export default function EditProfilePopup({user}){
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
-    
+    console.log('profile popup', user)
     const [userData, setUserData] = useState({
-        email: user?.data?.email || "",
-        age: user?.data?.age || "",
-        designation: user?.data?.designation || "",
-        location: user?.data?.location || "",
-        about: user?.data?.about || "",
-        image: user?.data?.avatar ||"",
+        email: user?.user?.email || "",
+        age: user?.user?.age || "",
+        designation: user?.user?.designation || "",
+        location: user?.user?.location || "",
+        about: user?.user?.about || "",
+        image: user?.user?.avatar ||"",
         newImage:""
     })
     const cancelRef = useRef()

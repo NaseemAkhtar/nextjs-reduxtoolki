@@ -56,9 +56,8 @@ export default function BlogList({data}){
                             <Image 
                                 src={blog?.authorId?.avatar?.url || avatar}
                                 alt="Avatar"
-                                height={30}
-                                width={30}
-                                sizes="100vw"
+                                height={50}
+                                width={50}
                                 className="w-10 h-10 rounded-full cursor-pointer"
                             />
                             <div className="text-xs">

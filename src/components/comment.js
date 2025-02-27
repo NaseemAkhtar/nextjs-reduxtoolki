@@ -172,9 +172,8 @@ console.log(session,'blogData comm', comments)
                     <Image
                     src={comment?.user?.avatar?.url ? comment?.user?.avatar?.url : avatar}
                     alt="avatar image"
-                    width={0}
-                    height={0}
-                    sizes="100vw"
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full"
                     />
 

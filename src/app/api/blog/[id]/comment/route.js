@@ -47,7 +47,7 @@ export async function DELETE(req) {
     const accessToken = req.headers.get("authorization")
     const token = accessToken?.split(" ")[1]
     const verifyToken = verifyJwtToken(token)
-    
+    console.log('accessToken????', accessToken, '...ans....', verifyToken)
     if(!accessToken || !verifyToken){
         return NextResponse.json({
             message: "Unauthorized (wrong or expired token)"

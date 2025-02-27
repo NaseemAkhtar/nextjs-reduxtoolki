@@ -146,11 +146,12 @@ console.log(session,'blogData comm', comments)
 
             {session?.user && (
             <form onSubmit={handleComment} className="space-y-2">
-                <Input
+                <Textarea
                     onChange={(e) => setCommentText(e.target.value)}
                     value={commentText}
                     name="comment"
                     type="text"
+                     rows="4"
                     placeholder="Type message..."
                 />
 
@@ -162,7 +163,9 @@ console.log(session,'blogData comm', comments)
             )}
 
             {!comments?.length && (
-                <p>No comments</p>
+                <div className="h-[100px] flex justify-center items-center">
+                    <h4 className="text-xl">No comments</h4>
+                </div>
             )}
 
             {comments && !!comments.length && ( 

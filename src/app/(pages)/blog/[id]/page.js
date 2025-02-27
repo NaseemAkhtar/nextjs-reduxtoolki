@@ -32,11 +32,11 @@ export default async function Blog({params}){
     let blog = await fetchBlog(params?.id) || {}
     if(Object.keys(blog).length === 0) return null
 
-    console.log('session?.user', session?.user)
-
     return(<div className="container">
         <section className="">
-            {session?.user && <UpdateDeleteBlog id={params?.id} photoId={blog?.image?.id}/>}
+            {session?.user && (session?.user?._id?.toString() === blog?.authorId?._id?.toString()) && 
+                <UpdateDeleteBlog id={params?.id} photoId={blog?.image?.id}/>
+            }
             
             <div className="flex flex-col items-center justify-center  gap-8">
                 <div className="blog-content w-full lg:w2/5 text-center">

@@ -44,6 +44,7 @@ console.log(session,'blogData comm', comments)
         setSuccess("")
         if(commentText.length <  10){
             setError("Minimum 10 charecters are required") 
+            setLoading(false)
             return
         }
         console.log('comment tetx', commentText)
@@ -146,7 +147,10 @@ console.log(session,'blogData comm', comments)
             {session?.user && (
             <form onSubmit={handleComment} className="space-y-2">
                 <Textarea
-                    onChange={(e) => setCommentText(e.target.value)}
+                    onChange={(e) => {
+                        setCommentText(e.target.value)
+                        setError("")
+                    }}
                     value={commentText}
                     name="comment"
                     type="text"
@@ -154,7 +158,7 @@ console.log(session,'blogData comm', comments)
                     placeholder="Type message..."
                 />
 
-                <Button disabled={loading} type="submit" className="btn">
+                <Button disabled={(loading || !commentText)} type="submit" className="btn">
                     {loading ? "Loading..." : "Comment"}
                 </Button>
                 {error && <div>{error}</div>}

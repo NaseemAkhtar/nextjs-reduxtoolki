@@ -53,8 +53,8 @@ export default async function Blog({params}){
                         <Image 
                             src={blog?.authorId?.avatar?.url || avatar}
                             alt="Avatar"
-                            height={30}
-                            width={30}
+                            height={40}
+                            width={40}
                             className="w-10 h-10 rounded-full cursor-pointer"
                         />
                         <div className="text-xs">

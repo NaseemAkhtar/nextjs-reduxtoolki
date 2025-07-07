@@ -1,10 +1,7 @@
 "use client"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { redirect } from "next/navigation"
 import { useRouter } from "next/navigation";
-import axios from "axios"
-// import { signIn, auth } from "@/app/api/auth/[...nextauth]/auth" 
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -25,6 +22,7 @@ export default function LoginForm(){
     //     console.log('response',response)
     // }
 
+
     useEffect(()=>{
         setHydrate(true)
     },[])
@@ -41,6 +39,7 @@ export default function LoginForm(){
             signIn("credentials", { email:e.target.email.value, password:e.target.password.value, redirect: false }).then( async(e)=>{
                 if(e.error){
                     setError("Invalid email/password")
+                    setLoading(false)
                 } else{
                     router.push("/");
                 }

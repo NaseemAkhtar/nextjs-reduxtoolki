@@ -9,7 +9,7 @@ export async function POST(req){
     const token = accessToken.split(" ")[1]
 
     const decodeToken = verifyJwtToken(token)
-console.log(decodeToken ,"???????", token)
+// console.log(decodeToken ,"???????", token)
     if(!accessToken || !decodeToken){
         return NextResponse.json({
             error: "Unauthorised user found"
@@ -26,31 +26,46 @@ console.log(decodeToken ,"???????", token)
             data: newBlog
         },{status: 201})
     } catch(err){
+        console.error("Error creating blog:", err)
         return NextResponse.json({
             error: err.message
         },{status: 500})
     }
 }
 
-export async function GET(req){
-    await connect()
-    try{
-        const blogs = await Blog.find({})
-        .populate({
-            path: "authorId",
-            // strictPopulate: false,
-            select: "-password"
-        }).sort({createdAt: -1})
+export async function GET(req) {
+  await connect()
+  try {
+      const { searchParams } = new URL(req.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const skip = (page - 1) * limit
 
-        return NextResponse.json({
-            message: "Fetched All blog succesfully",
-            success: true,
-            data: blogs
-        },{status: 200})
-    } catch(err){
-        return NextResponse.json({
-            error: err.message,
-            
-        },{status: 500})
-    }
+    const total = await Blog.countDocuments({})
+
+    const blogs = await Blog.find({})
+      .select('title image slug createdAt authorId')
+      .populate({
+        path: 'authorId',
+        select: 'name email',
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean()
+
+    return NextResponse.json({
+        message: 'Fetched blogs successfully',
+        success: true,
+        data: blogs,
+        total,
+        page,
+        limit
+    }, { status: 200 })
+
+  } catch (err) {
+    return NextResponse.json({
+      error: err.message,
+    }, { status: 500 })
+  }
 }

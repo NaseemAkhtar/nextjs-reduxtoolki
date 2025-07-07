@@ -4,7 +4,7 @@ import { Blog } from "@/models/blog.model";
 
 export async function GET(req, res){
     await connect()
-
+    
     const { searchParams } = new URL(req.url);
     const authorId = searchParams.get("userId")
     const blogs = await Blog.find({authorId}).populate({
@@ -15,7 +15,7 @@ export async function GET(req, res){
     if(!blogs?.length){
         return NextResponse.json({
             message:"404 blogs not found"
-        },{status:403})
+        },{status:404})
     }
     try{
         return NextResponse.json({

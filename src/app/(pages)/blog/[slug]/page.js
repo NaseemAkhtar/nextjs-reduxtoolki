@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { unstable_noStore } from 'next/cache';
+// import { unstable_noStore } from 'next/cache';
 import { getServerSession } from 'next-auth/next';
 import { options } from '../../../api/auth/[...nextauth]/auth';
 import { dateFormat } from "@/lib/utils"
@@ -7,32 +7,43 @@ import Blockquote from "@/components/blockquote"
 import "../blog.css"
 import UpdateDeleteBlog from "@/components/updateDeleteBlog"
 import Comment from "@/components/comment";
-import { store } from "@/store/store";
-import { fetchblog, getBlogData } from "@/store/slice/blog.slice";
+// import { store } from "@/store/store";
+// import { fetchblog, getBlogData } from "@/store/slice/blog.slice";
 import avatar from "../../../../../public/img/avatar.png"
 
 
 
-const fetchBlog = async (id="")=>{
-    unstable_noStore()
-    try{
-        await store.dispatch(fetchblog(id))
-        const getState = store.getState()
+// const fetchBlog = async (slug="")=>{
+//     // unstable_noStore()
+//     try{
+//         await store.dispatch(fetchblog(slug))
+//         const getState = store.getState()
         
-        // const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`)
-        return  getState?.blogData?.blog//response?.data?.data
-    } catch(err){
-        console.log('Something went wrong')
-    }
-}
+//         // const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`)
+//         return  getState?.blogData?.blog//response?.data?.data
+//     } catch(err){
+//         console.log('Something went wrong')
+//     }
+// }
 
 export default async function Blog({params}){
     const session = await getServerSession(options)
 
-    let blog = await fetchBlog(params?.id) || {}
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${params?.slug}`, {
+        next: { revalidate: 60 } // ⏰ Revalidate every 60s
+    })
+
+    if (!res.ok) {
+        console.log('Error fetching blog:', res.statusText)
+        return <div>Error loading blog</div>
+    }
+
+    const json = await res.json()
+    let blog  = json.data || {}
+
+    // let blog = await fetchBlog(params?.slug) || {}
     if(Object.keys(blog).length === 0) return null
 
-    console.log('Blog data....', blog)
 
     return(<div className="container">
         <section className="">

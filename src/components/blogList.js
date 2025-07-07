@@ -48,7 +48,7 @@ export default function BlogList({data}){
                             
                         </div>
                         <CardTitle className="mb-2">
-                            <Link href={`/blog/${blog?._id}`}>{blog?.title}</Link>
+                            <Link href={`/blog/${blog?.slug ? blog?.slug : blog?._id}`}>{blog?.title}</Link>
                         </CardTitle>
                         <CardDescription>{blog.excerpt}</CardDescription>
 

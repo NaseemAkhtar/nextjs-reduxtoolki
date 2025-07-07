@@ -5,7 +5,6 @@ import AuthProvider from "@/lib/authProvider";
 import { Header } from "@/components/header";
 import Providers from "@/providers";
 import Footer from "@/components/footer";
-
 // const Header =  React.lazy(() => import('@/components/header'));
 
 const geistSans = localFont({
@@ -25,6 +24,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  
+  
   return (
     <html lang="en">
       <body

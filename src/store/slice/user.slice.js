@@ -1,14 +1,22 @@
 const { createSlice } = require("@reduxjs/toolkit");
 import axios from "axios";
 
-const userRepo = async (data)=>{
-    console.log('user slice data????', data)
-    return await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/user`, {
-        headers :{
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${data?.user?.accessToken}`
+export const userRepo = async (data)=>{
+    try{
+        if(!data?.user?.accessToken){
+            throw new Error('User not authenticated');
         }
-    })
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users/user`, {
+            headers :{
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data?.user?.accessToken}`
+            }
+        })
+        return response
+    } catch(err){
+        console.error('Error in userRepo:', err);
+        // throw new Error('Failed to fetch user data');
+    }
 }
 
 const initialState = {
@@ -49,14 +57,14 @@ export const {loading, getUserData, userError} = userSlice.actions
 export const fetchUser = (data)=>{
     return async (dispatch)=>{
         dispatch(loading(false))
-        await userRepo(data)
-       .then(response=>{
-        console.log('slice data???new', response?.data?.data)
-        dispatch(getUserData(response.data?.data))
-       })
-       .catch(err=>{
-            dispatch(userError("User not authenticated"))
-       })
+        dispatch(getUserData(data))
+    //     await userRepo(data)
+    //    .then(response=>{
+    //     dispatch(getUserData(response.data?.data))
+    //    })
+    //    .catch(err=>{
+    //         dispatch(userError("User not authenticated"))
+    //    })
     }
 }
 

@@ -5,20 +5,26 @@ import { verifyJwtToken } from "@/lib/jwt";
 
 
 export async function GET(req, res){
-    await connect()
-    const id = res.params.id
+    await connect() 
+    const slug = res.params.slug
 
     try{
-        if(!id){
+        if(!slug){
             return NextResponse.json({
-                message: "Blog id required",
+                message: "Blog slug required",
                 success: false
             },{status: 404})
         }
         
 
-        const blog = await Blog.findById(id)
-        .populate({
+        let newSlug = {}
+        if(slug.includes("-")){
+            newSlug.slug = slug
+        } else {
+            newSlug._id = slug
+        }
+        
+        let blog = await Blog.findOne(newSlug).populate({
             path: "authorId",
             select: "-password"
         })
@@ -40,8 +46,9 @@ export async function GET(req, res){
         },{status: 200})
 
     } catch(err){
+        console.error("Error fetching blog:", err)
         return NextResponse.json({
-            error: error.message,
+            error: err.message,
             success: false
         },{status: 500})
     }

@@ -15,7 +15,7 @@ export async function GET(req, res){
 
         const verifyToken =  verifyJwtToken(token)
         // const session = await getServerSession(options);
-        console.log("session route......??? new",  verifyToken)
+        // console.log("session route......??? new",  verifyToken)
         // console.log(session.user,"Req params.....", query?.searchParams.get('uid'))
         const user = await User.findOne({_id:verifyToken?._id}).select("-password")
        

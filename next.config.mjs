@@ -9,6 +9,10 @@ const nextConfig = {
         port: '',
         search: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+      }
     ],
   }
 };

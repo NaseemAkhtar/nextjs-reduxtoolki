@@ -1,8 +1,9 @@
-"use client"
+
 import Link from "next/link";
 import axios from "axios";
-import { useEffect, useState} from "react";
-import { useDispatch, useSelector } from "react-redux";
+import dynamic from 'next/dynamic';
+// import { useEffect, useState} from "react";
+// import { useDispatch, useSelector } from "react-redux";
 import avatar from "../../public/img/avatar.png"
 import Image from "next/image";
 import { useSession, signOut} from "next-auth/react";
@@ -22,29 +23,51 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-import { fetchUser } from "@/store/slice/user.slice";
+ 
+import { getServerSession } from "next-auth";
+import { options } from "@/app/api/auth/[...nextauth]/auth";
+import { store } from "@/store/store"; 
+import { fetchUser, userRepo } from "@/store/slice/user.slice";
+const LogoutButton = dynamic(() => import('@/components/logoutButton'), {
+    ssr: false
+})
 
 
-export function Header(){
-    const {data: session, status} = useSession()
-    const dispach = useDispatch()
-    const {user, loading:userLoading, userError} = useSelector(state=> state?.userData)
-console.log('session header? state', user, userLoading)
-    useEffect(()=>{
+
+export async function Header(){
+    const serverSession = await getServerSession(options)
+    let user
+    if(serverSession?.user){
+        let res = await userRepo(serverSession)
+        user = res?.data?.data
+        console.log('user......?????header user', user)
+        await store.dispatch(fetchUser(user))
+        //response.data?.data
+        // console.log('serverSession......',serverSession)
+        //   await store.dispatch(user.data?.data)
+        //   user = store.getState()
+    }
+
+    // const {data: session, status} = useSession()
+    // const dispach = useDispatch()
+    // const {user, loading:userLoading, userError} = useSelector(state=> state?.userData)
+// console.log('session header? state', user, userLoading)
+
+    // useEffect(()=>{
         
-        (async()=>{
-            if(status == "authenticated"){
-                dispach(fetchUser(session))
-                // const response = await axios.get("/api/users/user", {
-                //     headers :{
-                //         'Content-Type': 'application/json',
-                //         'Authorization': `Bearer ${session?.user?.accessToken}`
-                //     }
-                // })
-                // setUser(response?.data?.data)
-            }
-        })()
-    },[status])
+    //     (async()=>{
+    //         if(status == "authenticated"){
+    //             dispach(fetchUser(session))
+    //             // const response = await axios.get("/api/users/user", {
+    //             //     headers :{
+    //             //         'Content-Type': 'application/json',
+    //             //         'Authorization': `Bearer ${session?.user?.accessToken}`
+    //             //     }
+    //             // })
+    //             // setUser(response?.data?.data)
+    //         }
+    //     })()
+    // },[status])
 
     return(
         <header>
@@ -79,11 +102,8 @@ console.log('session header? state', user, userLoading)
                                             </Link>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
-                                        
-                                        <DropdownMenuItem onClick={()=>signOut()} className="cursor-pointer">
-                                            <LogOut />
-                                            <span>Log out</span>
-                                        </DropdownMenuItem>
+                                         {/* onClick={()=>signOut()} */}
+                                        <LogoutButton/>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>

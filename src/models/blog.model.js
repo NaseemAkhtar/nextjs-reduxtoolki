@@ -1,10 +1,15 @@
 import mongoose,{Schema} from "mongoose";
-        
+import slugify from 'slugify'
+
 const BlogSchema = Schema({
     title: {
         type: String,
         required: true,
         min: 4
+    },
+    slug: {
+        type: String,
+        unique: true,
     },
     description: {
         type: String,
@@ -59,5 +64,14 @@ const BlogSchema = Schema({
         }
     }]
 }, {timestamps: true})
+
+BlogSchema.pre("save", function(next) {
+    if (this.isModified("title")) {
+        // this.slug = this.title.toLowerCase().replace(/ /g, "-");
+        this.slug = slugify(this.title, { lower: true, strict: true })
+    }
+    next();
+});
+
 
 export const Blog = mongoose?.models.Blog || mongoose.model("Blog", BlogSchema)

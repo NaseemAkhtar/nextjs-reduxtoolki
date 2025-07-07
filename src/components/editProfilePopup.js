@@ -20,22 +20,24 @@ import Image from "next/image"
 import { uploadPhoto } from "@/lib/utils"
 import { deletePhoto } from "@/lib/cloudinayAction"
 
-export default function EditProfilePopup({user}){
+export default function EditProfilePopup({user}){   
     const {data: session, status} = useSession()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
     console.log('profile popup', user)
     const [userData, setUserData] = useState({
-        email: user?.user?.email || "",
-        age: user?.user?.age || "",
-        designation: user?.user?.designation || "",
-        location: user?.user?.location || "",
-        about: user?.user?.about || "",
-        image: user?.user?.avatar ||"",
+        email: user?.email || "",
+        age: user?.age || "",
+        designation: user?.designation || "",
+        location: user?.location || "",
+        about: user?.about || "",
+        image: user?.avatar ||"",
         newImage:""
     })
     const cancelRef = useRef()
+
+    console.log('userData in profile popup', user)
 
     const handleChange = (e)=>{
         const {id,type,value, files} = e.target

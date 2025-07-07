@@ -6,7 +6,7 @@ import { User } from "@/models/user.model";
 
 export async function POST(req, res){
     await connect()
-    const id = res?.params?.id
+    const slug = res?.params?.slug
     const accessToken = req.headers.get("authorization")
     const token = accessToken?.split(" ")[1]
     const verifyToken = verifyJwtToken(token)
@@ -18,7 +18,13 @@ export async function POST(req, res){
     }
     try{
         const body = await req.json()
-        const blog = await Blog.findById(id)
+        let newSlug = {}
+        if(slug.includes("-")){
+            newSlug.slug = slug
+        } else {
+            newSlug._id = slug
+        }
+        const blog = await Blog.findOne(newSlug)
         const user = await User.findById(verifyToken?._id).select("-password")
         const newComment = {
             text: body?.text,
@@ -36,6 +42,7 @@ export async function POST(req, res){
         },{status: 201})
 
     }catch(err){
+        console.error("Error creating comment:", err)
         return NextResponse.json({
             error: err.message
         },{status: 500})

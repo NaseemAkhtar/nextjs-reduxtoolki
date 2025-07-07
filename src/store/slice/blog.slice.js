@@ -1,8 +1,8 @@
 const { createSlice } = require("@reduxjs/toolkit");
 import axios from "axios";
 
-const blogRepo = async (id)=>{
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`)
+const blogRepo = async (slug)=>{
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${slug}`)
    return response
 }
 
@@ -11,7 +11,7 @@ const blogListRepo = async (params)=>{
    return response
 }
 
-const allBlogListRepo = async ()=>{
+export const allBlogListRepo = async ()=>{
     const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog`)
    return response
 }
@@ -102,9 +102,9 @@ export const {
 } = userSlice.actions
 
 export const fetchblog = (id)=>{
+    
     return async (dispatch)=>{
         dispatch(loading(false))
-        console.log('ljbsfvjhjdfhfd', id)
         await blogRepo(id)
        .then(response=>{
         dispatch(getBlogData(response?.data?.data))
@@ -118,7 +118,6 @@ export const fetchblog = (id)=>{
 export const fetchblogList = (params)=>{
     return async (dispatch)=>{
         dispatch(userBloglistLoading(false))
-        console.log('Blog list params', params)
         await blogListRepo(params)
        .then(response=>{
         dispatch(userBloglistData(response?.data?.data))

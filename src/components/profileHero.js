@@ -1,13 +1,14 @@
-"use client"
+import { store } from "@/store/store";
 import Image from "next/image"
 import hero from "../../public/img/bird-06.jpg"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import EditProfilePopup from "@/components/editProfilePopup"
 
-export default function UserProfile({userData}){
-    console.log('userData??? new',userData)
-    return(<>
+export default async function UserProfile({userData}){
+    // const state = await store.getState();
+    // const userData = state?.userData ?? null;
+    return(<>   
         <section className="user_banner w-full">
             <AspectRatio ratio={18 / 4}>
                 <Image
@@ -26,21 +27,21 @@ export default function UserProfile({userData}){
                 <div className="flex flex-row">
                     <Avatar className="w-[60px] h-[60px]">
                         <Image
-                            src={`${userData?.user?.avatar?.url || "https://github.com/shadcn.png"}`}
+                            src={`${userData?.avatar?.url || "https://github.com/shadcn.png"}`}
                             alt="avatar image"
                             width={60}
                             height={60}
                             className="rounded-md"
                         />
-                        {/* <AvatarImage src={`${userData?.user?.avatar?.url || "https://github.com/shadcn.png"}`} /> */}
-                        <AvatarFallback>{userData?.user?.name}</AvatarFallback>
+                        {/* <AvatarImage src={`${userData?.avatar?.url || "https://github.com/shadcn.png"}`} /> */}
+                        <AvatarFallback>{userData?.name}</AvatarFallback>
                     </Avatar>
                     <EditProfilePopup user={userData}/>
                 </div>
                 <div className="flex flex-col gap-1 text-center">
-                    <h5>{userData?.user?.name}</h5>
-                    <p className="text-xs text-light">{userData?.user?.designation} | {userData?.user?.email}</p>
-                    <p>{userData?.user?.about}</p>
+                    <h5>{userData?.name}</h5>
+                    <p className="text-xs text-light">{userData?.designation} | {userData?.email}</p>
+                    <p>{userData?.about}</p>
                 </div>
             </div>
         </section>

@@ -1,27 +1,25 @@
-import { unstable_noStore } from 'next/cache';
-// import dynamic from 'next/dynamic';
-import { lazy, Suspense } from 'react';
-import { fetchAllBlogList } from "@/store/slice/blog.slice";
-import { store } from "@/store/store";
+// import { unstable_noStore } from 'next/cache';
+import axios from 'axios';
+import SingleBlog from "@/components/singleBlog";
+import BlogList from "@/components/blogList";
 import "./blog.css"
 
-// const SingleBlog = dynamic(() => import('@/components/singleBlog'), {ssr: true});
-// const BlogList = dynamic(() => import('@/components/blogList'), {ssr: true});
-const SingleBlog = lazy(() => import('@/components/singleBlog'), {ssr: true});
-const BlogList = lazy(() => import('@/components/blogList'), {ssr: true});
-
-const Blog = async ()=>{
-    unstable_noStore()
+export default async function Blog() {
+    // unstable_noStore()
     let data;
-    
-    try {
-        await store.dispatch(fetchAllBlogList())
-        const blogList = await store.getState()
-        data = blogList?.blogData?.allBlogs
-    } catch (error) {
-        console.log('Error fetching data:', error.message);
-        data = { error: error.message };
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog`, {
+        next: { revalidate: 60 } // ⏰ Revalidate every 60s
+    })
+
+    if (!res.ok) {
+        console.log('Error fetching blogs:', res.statusText)
+        return <div>Error loading blogs</div>
     }
+
+    const json = await res.json()
+    data = json.data
+
 
     if(data && !data?.length){
         return (
@@ -36,13 +34,11 @@ const Blog = async ()=>{
         <h1 className="flex justify-center w-full my-5">Trending &nbsp;
             <span className="text-yellow text-center"> Blog</span>
         </h1>
-        {!!data?.length &&
-        <Suspense fallback={<h1>Loading....</h1>}>
+        {!!data?.length &&<>
             <SingleBlog data={data}/>
             {data?.length > 1 && <BlogList data={data}/>}
-        </Suspense>}
+        </>}
+        
     </div>
     </>)
 }
-
-export default Blog

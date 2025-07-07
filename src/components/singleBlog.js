@@ -25,7 +25,7 @@ export default function SingleBlog({data}){
                 {dateFormat(singleBlog?.createdAt)}
             </div>
             <h2 className="mb-2">
-                <Link href={`/blog/${singleBlog?._id}`}>{singleBlog?.title}</Link>
+                <Link href={`/blog/${singleBlog?.slug ? singleBlog?.slug : singleBlog?._id}`}>{singleBlog?.title}</Link>
             </h2>
             <p className="mb-3">{singleBlog?.description}</p>
             

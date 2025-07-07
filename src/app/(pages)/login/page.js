@@ -1,3 +1,6 @@
+import { getServerSession } from "next-auth";
+import { options } from "@/app/api/auth/[...nextauth]/auth";
+import { redirect } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -9,6 +12,9 @@ import Link from "next/link"
 import LoginForm from "@/components/loginForm"
 
 export default async function Login(){
+    const serverSession = await getServerSession(options)
+    console.log('serverSession in login page', serverSession)
+     
     return(
     <div className="naseem flex justify-center">
         <Card>

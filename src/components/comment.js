@@ -27,7 +27,7 @@ console.log(session,'blogData comm', comments)
             alert("Login required")
             return
         }
-        const res = await axios.put(`/api/blog/${blogId.id}/like`, {}, {
+        const res = await axios.put(`/api/blog/${blogId.slug}/like`, {}, {
             headers :{
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${session?.user?.accessToken}`
@@ -49,7 +49,7 @@ console.log(session,'blogData comm', comments)
         }
         console.log('comment tetx', commentText)
         try{
-            const res = await axios.post(`/api/blog/${blogId.id}/comment`, {text:commentText}, {
+            const res = await axios.post(`/api/blog/${blogId.slug}/comment`, {text:commentText}, {
                 headers :{
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.user?.accessToken}`
@@ -80,8 +80,8 @@ console.log(session,'blogData comm', comments)
     }
 
     const hendleDeleteComment = async (commentId)=>{
-        console.log('blogId.id', blogId.id)
-        const res = await axios.delete(`/api/blog/${blogId.id}/comment`, {
+        console.log('blogId.slug', blogId.slug)
+        const res = await axios.delete(`/api/blog/${blogId.slug}/comment`, {
             data: {
                 postId: blogId?.id,
                 commentId: commentId

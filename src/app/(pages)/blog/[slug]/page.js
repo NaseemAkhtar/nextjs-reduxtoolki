@@ -48,7 +48,7 @@ export default async function Blog({params}){
     return(<div className="container">
         <section className="">
             {session?.user && (session?.user?._id?.toString() === blog?.authorId?._id?.toString()) && 
-                <UpdateDeleteBlog id={params?.id} photoId={blog?.image?.id}/>
+                <UpdateDeleteBlog id={params?.slug} photoId={blog?.image?.id}/>
             }
             
             <div className="flex flex-col items-center justify-center  gap-8">

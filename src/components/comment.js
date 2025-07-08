@@ -2,15 +2,13 @@
 
 import { AiFillHeart, AiOutlineHeart, AiOutlineComment, AiTwotoneCalendar } from "react-icons/ai";
 import { Trash2 } from "lucide-react"
-
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useSession } from "next-auth/react";
 import avatar from "../../public/img/avatar.png"
 import Image from "next/image";
-import axios from "axios";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { addComment, deleteComment, likeBlog } from "@/server-actions/action.blog";
 
 export default function Comment({blogId, blogData}){
     const {data:session, status} = useSession()
@@ -21,23 +19,26 @@ export default function Comment({blogId, blogData}){
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
 
-console.log(session,'blogData comm', comments)
-    const handleLike = async ()=>{
+    
+    const handleLike = useCallback(async ()=>{
         if(!session?.user) {
             alert("Login required")
             return
         }
-        const res = await axios.put(`/api/blog/${blogId.slug}/like`, {}, {
-            headers :{
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session?.user?.accessToken}`
-            }
-        })
-        console.log('like res...', res?.data?.data)
-        setLikes(res?.data?.data?.likes)
-    }
+        let res = await likeBlog(blogId.slug, session?.user?.accessToken)
+        if(res?.status !== 200){
+            setError(res?.data?.message || "An unexpected error occurred.");
+            return
+        }
+        setSuccess("Blog liked successfully!");
+        if(res?.likes?.length === 0){
+            setLikes([])
+            return
+        }
+        setLikes(res?.likes)
+    }, [session, blogId.slug]);
 
-    const handleComment = async (e)=>{
+    const handleComment = useCallback(async (e)=>{
         e.preventDefault()
         setLoading(true)
         setError("")
@@ -47,18 +48,12 @@ console.log(session,'blogData comm', comments)
             setLoading(false)
             return
         }
-        console.log('comment tetx', commentText)
+        
         try{
-            const res = await axios.post(`/api/blog/${blogId.slug}/comment`, {text:commentText}, {
-                headers :{
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.accessToken}`
-                }
-            })
-
+            const res = await addComment(blogId.slug, {text:commentText}, session?.user?.accessToken)
             if (res?.status === 201) {
                 setSuccess("Blog Addes successfully!");
-                setComments(prev => [...prev, res?.data?.data])
+                setComments(prev => [res?.data, ...prev])
                 setCommentText("")
             } else {
                 setError(res?.data?.message || "An unexpected error occurred.");
@@ -77,45 +72,30 @@ console.log(session,'blogData comm', comments)
         }finally{
             setLoading(false)
         }
-    }
+    }, [blogId.slug, session?.user?.accessToken, commentText]);
 
-    const hendleDeleteComment = async (commentId)=>{
-        console.log('blogId.slug', blogId.slug)
-        const res = await axios.delete(`/api/blog/${blogId.slug}/comment`, {
-            data: {
-                postId: blogId?.id,
-                commentId: commentId
-            },
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session?.user?.accessToken}`
-            }
-        });
-        if (res?.status === 200) {
-            setSuccess("Blog deleted successfully!");
-            console.log('comment response delete....', res?.data?.data)
-            setComments(res?.data?.data)
+    const hendleDeleteComment = useCallback(async (commentId)=>{
+        try {
+            let res = await deleteComment(blogId.slug, {postId: blogId?.slug, commentId: commentId}, session?.user?.accessToken)
+            if (res?.status === 200) {
+                setSuccess("Blog deleted successfully!");
+                setComments(prev => prev.filter(comment => comment._id !== commentId))
 
-        } else {
-            if (err.response) {
-                // Server responded with a status other than 200 range
-                setError(err.response.data.message || "Server error occurred.");
-            } else if (err.request) {
-                // Request was made but no response received
-                setError("No response from server. Please try again later.");
             } else {
-                // Something else happened while setting up the request
-                setError("Error: " + err.message);
+                setError(res.message || "Server error occurred.");
             }
+        } catch(err){
+            console.error("Error deleting comment:", err);
+            setError(err.message || "Something went wrong while deleting the comment.");
+            return;
         }
-    }
+    }, [blogId.slug, session?.user?.accessToken]);
 
     return(
         <div className="">
            <div className="py-12">
             <div className="flex gap-10 items-center text-xl justify-center">
                 <div className="flex items-center gap-1">
-                    {console.log('likes?.length',likes)}
                     <p>{likes?.length}</p>
 
                     {likes?.length ? (

@@ -1,6 +1,7 @@
 "use client"
 import { useSession } from "next-auth/react"
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
+import { useRouter } from "next/navigation";
 import axios from "axios"
 import {
     Dialog,
@@ -19,8 +20,10 @@ import Image from "next/image"
 
 import { uploadPhoto } from "@/lib/utils"
 import { deletePhoto } from "@/lib/cloudinayAction"
+import { updateUserProfile } from "@/server-actions/action.user";
 
 export default function EditProfilePopup({user}){   
+    const router = useRouter()
     const {data: session, status} = useSession()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
@@ -49,12 +52,11 @@ export default function EditProfilePopup({user}){
         }
     }
     
-    const handleUpdateProfile = async (e)=>{
+    const handleUpdateProfile = useCallback(async (e)=>{
         e.preventDefault()
         // setLoading(true),
         setError("")
         setSuccess("")
-        
         
         try{
             if(status !== "authenticated"){
@@ -82,16 +84,12 @@ export default function EditProfilePopup({user}){
             let newdata = {
                 email, age, designation, location, about, avatar:photo
             }
-            console.log('cloudinary????', newdata)
-            const response = await axios.patch("/api/users/user", {...newdata}, {
-                headers :{
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.accessToken}`
-                }
-            })
-            console.log('profile update?????', response)
+            
+            const response = await updateUserProfile(session?.user?.accessToken, newdata)
+            console.log('response in profile update', response)
             if(response?.status == 200){
                 setSuccess(response?.data?.message)
+                router.refresh()
                 if(response?.data){
                     setTimeout(()=>{
                        cancelRef.current?.click()
@@ -114,7 +112,7 @@ export default function EditProfilePopup({user}){
         } finally {
             setLoading(false);
         }
-    }
+    }, [userData, session, status])
     
     return(<>
         <Dialog>

@@ -1,25 +1,22 @@
 // import { unstable_noStore } from 'next/cache';
-import axios from 'axios';
 import SingleBlog from "@/components/singleBlog";
 import BlogList from "@/components/blogList";
+import { getAllBlogs } from "@/server-actions/action.blog"
 import "./blog.css"
+
+// export const dynamic = "force-dynamic";
 
 export default async function Blog() {
     // unstable_noStore()
     let data;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog`, {
-        next: { revalidate: 60 } // ⏰ Revalidate every 60s
-    })
-
-    if (!res.ok) {
-        console.log('Error fetching blogs:', res.statusText)
+    let serverData = await getAllBlogs({ page: 1, limit: 10 })
+    if (serverData?.error) {
+        console.log('Error fetching blogs:', serverData.error)
         return <div>Error loading blogs</div>
-    }
+    }   
 
-    const json = await res.json()
-    data = json.data
-
+    data = serverData?.data || []
 
     if(data && !data?.length){
         return (

@@ -80,7 +80,7 @@ export async function PUT(req, res){
             id,
             {$set: {...body}},
             {new: true}
-        )
+        )   
         return NextResponse.json({
             message: "Blog Updated successfully!",
             data: updateBlog

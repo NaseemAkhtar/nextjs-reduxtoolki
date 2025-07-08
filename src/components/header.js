@@ -40,7 +40,7 @@ export async function Header(){
     if(serverSession?.user){
         let res = await userRepo(serverSession)
         user = res?.data?.data
-        console.log('user......?????header user', user)
+        
         await store.dispatch(fetchUser(user))
         //response.data?.data
         // console.log('serverSession......',serverSession)

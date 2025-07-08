@@ -4,6 +4,9 @@ import bird from "../../public/img/rare-bird-02.jpg"
 import avatar from "../../public/img/avatar.png"
 import { dateFormat } from "@/lib/utils"
 import Link from "next/link"
+import {
+  CardDescription,
+} from "@/components/ui/card"
 
 export default function SingleBlog({data}){
     console.log('client data', data)
@@ -27,8 +30,7 @@ export default function SingleBlog({data}){
             <h2 className="mb-2">
                 <Link href={`/blog/${singleBlog?.slug ? singleBlog?.slug : singleBlog?._id}`}>{singleBlog?.title}</Link>
             </h2>
-            <p className="mb-3">{singleBlog?.description}</p>
-            
+            <CardDescription className="mb-3">{singleBlog?.excerpt}</CardDescription>
             <div className="author flex items-center gap-3">
                 <Image 
                     src={singleBlog?.authorId?.avatar?.url ||avatar}

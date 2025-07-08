@@ -3,7 +3,6 @@ import React, {useState, useEffect} from "react"
 import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
@@ -19,6 +18,7 @@ import {
   } from "@/components/ui/select"
 import { uploadPhoto } from "@/lib/utils"
 import { deletePhoto } from "@/lib/cloudinayAction"
+import { updateBlog } from "@/server-actions/action.blog"
 
 const initialState = {
     title: "",
@@ -62,6 +62,13 @@ export default function EditBlog({params}){
                 console.log('Something went wrong')
             }
         })()
+
+        // Cleanup function to reset state
+        return ()=>{
+            setState(initialState)
+            setError("")
+            setSuccess("")
+        }
     },[])
 
     if(status === "loading") return <h1 className="text-white">Loading</h1>
@@ -115,17 +122,18 @@ export default function EditBlog({params}){
                 quote,
                 authorId: session?.user?._id
             }
-
-            const res = await axios.post("/api/blog", newPost, {
-                headers :{
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.accessToken                    }`
-                }
-            })
+            if(!newPost.image?.url){
+                setError("Image is required")
+                return
+            }
+            let res = await updateBlog(params.id, newPost, session?.user?.accessToken)
             
-            if(res?.status == 201){
+            if(res?.status == 200 || res?.data?.success){
+                setLoading(false)
+                setError("")
                 setSuccess("Blog Edited succesfully")
-                router.push("/blog")
+                router.push(`/blog/${params.id}`)
+                router.refresh()   
             } else {
                 setError("Error occured while creting blog")
             }
@@ -235,7 +243,7 @@ export default function EditBlog({params}){
                 {success && <div className="text-green-700">{success}</div>}
 
                 <Button type="submit" variant="destructive" className="btn">
-                {isLoading ? "Loading..." : "Create"}
+                {isLoading ? "Loading..." : "Update"}
                 </Button>
             </form>
         </section>

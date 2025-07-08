@@ -1,4 +1,3 @@
-import { store } from "@/store/store";
 import Image from "next/image"
 import hero from "../../public/img/bird-06.jpg"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -6,8 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import EditProfilePopup from "@/components/editProfilePopup"
 
 export default async function UserProfile({userData}){
-    // const state = await store.getState();
-    // const userData = state?.userData ?? null;
     return(<>   
         <section className="user_banner w-full">
             <AspectRatio ratio={18 / 4}>

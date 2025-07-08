@@ -15,12 +15,11 @@ import { dateFormat } from "@/lib/utils"
 import Link from "next/link"
 
 export default function BlogList({data}){
-    console.log('data blogs....', data[2])
     return(
         <div className="blog-list grid grid-cols-1 md:grid-cols-3 gap-3 mt-10">
             {data?.map((blog, ind)=>(
                 ind != 0 &&
-                <Card key={blog._id} className="w-[350px] black-bg mb-3">
+                <Card key={blog._id.toSring} className="w-[350px] black-bg mb-3">
                     
                     <CardHeader className="p-3">
                         <Image

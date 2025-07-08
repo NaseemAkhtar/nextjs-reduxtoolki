@@ -1,47 +1,29 @@
 import Image from "next/image"
-// import { unstable_noStore } from 'next/cache';
 import { getServerSession } from 'next-auth/next';
 import { options } from '../../../api/auth/[...nextauth]/auth';
 import { dateFormat } from "@/lib/utils"
 import Blockquote from "@/components/blockquote"
-import "../blog.css"
 import UpdateDeleteBlog from "@/components/updateDeleteBlog"
 import Comment from "@/components/comment";
-// import { store } from "@/store/store";
-// import { fetchblog, getBlogData } from "@/store/slice/blog.slice";
+import { getBlogBySlug } from "@/server-actions/action.blog";
 import avatar from "../../../../../public/img/avatar.png"
+import "../blog.css"
 
-
-
-// const fetchBlog = async (slug="")=>{
-//     // unstable_noStore()
-//     try{
-//         await store.dispatch(fetchblog(slug))
-//         const getState = store.getState()
-        
-//         // const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`)
-//         return  getState?.blogData?.blog//response?.data?.data
-//     } catch(err){
-//         console.log('Something went wrong')
-//     }
-// }
+// export const dynamic = "force-dynamic";
 
 export default async function Blog({params}){
     const session = await getServerSession(options)
+    let singleBlog = await getBlogBySlug(params?.slug)
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${params?.slug}`, {
-        next: { revalidate: 60 } // ⏰ Revalidate every 60s
-    })
-
-    if (!res.ok) {
-        console.log('Error fetching blog:', res.statusText)
-        return <div>Error loading blog</div>
+    if(!singleBlog.success) {
+        console.log('Blog not found or empty:', singleBlog)
+        return <div className="container w-full h-[400px] flex items-center justify-center">
+            <h1>Blog not found</h1>
+        </div>
     }
 
-    const json = await res.json()
-    let blog  = json.data || {}
+    let blog  = singleBlog?.data || {}
 
-    // let blog = await fetchBlog(params?.slug) || {}
     if(Object.keys(blog).length === 0) return null
 
 

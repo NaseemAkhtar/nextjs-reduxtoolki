@@ -1,13 +1,11 @@
 "use client"
-import React, {useState, useEffect} from "react"
+import React, {useState} from "react"
 import { useSession } from "next-auth/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
-import axios from "axios"
 import {
     Select,
     SelectContent,
@@ -18,6 +16,8 @@ import {
     SelectValue,
   } from "@/components/ui/select"
 import { uploadPhoto } from "@/lib/utils"
+
+import { createPost } from "@/server-actions/action.blog"
 
 const initialState = {
     title: "",
@@ -45,9 +45,6 @@ export default function CreateBlog(){
         } else {
             setState({...state, [name]: value})
         }
-
-        
-        // console.log(state, name, type, "image???", files)
     }
     
     const handleSubmit = async(e)=>{
@@ -83,20 +80,20 @@ export default function CreateBlog(){
                 authorId: session?.user?._id
             }
 
-            const res = await axios.post("/api/blog", newPost, {
-                headers :{
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.accessToken                    }`
-                }
-            })
-            console.log('response', res)
+            const res = await createPost(newPost, session?.user?.accessToken)
+            console.log('res in create blog', res)
+            setLoading(false)
+            if(res?.error){
+                setError(res?.error || "Something went wrong")
+                return
+            }   
             if(res?.status == 201){
-                setSuccess("Blog created succesfully")
+                setSuccess("Blog created successfully")
                 router.push("/blog")
             } else {
-                setError("Error occured while creting blog")
+                setError("Error occurred while creating blog")
             }
-        } catch(err){
+        } catch(err) {
             setLoading(false)
             setError("Error occur while creating blog")
         }finally{
@@ -104,28 +101,6 @@ export default function CreateBlog(){
         }
     }
     
-    // const uploadImg = async ()=>{
-    //     if(!state.photo) return
-
-    //     const formData = new FormData()
-    //     formData.append("file", state.photo)
-    //     formData.append("upload_preset", process.env.NEXT_PUBLIC_UPLOAD_PRESET)
-
-    //     try{
-    //         let res = await axios.post(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDE_NAME}/image/upload`, formData)
-    //         console.log("res img", res)
-    //         const data = await res.data
-    //         let image = {
-    //             id: data["public_id"],
-    //             url: data["secure_url"]
-    //         }
-    //         return image
-    //     }catch(err){
-    //         console.log("Cloudinary error ",err)
-    //     }
-    // }
-
-
     return(
         <section className="container max-w-3xl">
             <h2 className="mb-5">

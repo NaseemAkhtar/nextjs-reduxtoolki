@@ -1,12 +1,12 @@
 "use client"
 import { FilePenLine, Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
-import axios from "axios"
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";    
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { deletePhoto } from "@/lib/cloudinayAction"
 import Link from "next/link";
+import {deleteBlog} from "@/server-actions/action.blog"
 
 export default function UpdateDeleteBlog({id, photoId}){
     const {data: session, status} = useSession()
@@ -16,26 +16,21 @@ export default function UpdateDeleteBlog({id, photoId}){
     const router = useRouter()
 
     const handleDelete = async()=>{
-    setLoading(true)
-    setError("")
-    setSuccess("")
-    await deletePhoto(photoId)
-    try {
-        let res = await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/api/blog/${id}`, {
-            headers :{
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session?.user?.accessToken                    }`
+        setLoading(true)
+        setError("")
+        setSuccess("")
+        await deletePhoto(photoId)
+        try {
+            let res = await deleteBlog(id, session?.user?.accessToken)
+            
+            if (res?.status === 200) {
+                setSuccess("Blog deleted successfully!");
+                await deletePhoto(photoId)
+                router.refresh()
+                router.push("/blog")
+            } else {
+                setError(res?.data?.message || "An unexpected error occurred.");
             }
-        });
-        
-        if (res?.data?.status === 200) {
-            setSuccess("Blog deleted successfully!");
-            await deletePhoto(photoId)
-            router.refresh()
-            router.push("/blog")
-        } else {
-            setError(res?.data?.message || "An unexpected error occurred.");
-        }
         } catch (err) {
             if (err.response) {
                 // Server responded with a status other than 200 range
@@ -48,7 +43,7 @@ export default function UpdateDeleteBlog({id, photoId}){
                 setError("Error: " + err.message);
             }
         } finally {
-            setLoading(false);
+                setLoading(false);
         }
     }
 
@@ -58,7 +53,7 @@ export default function UpdateDeleteBlog({id, photoId}){
                 <Link href={`/blog/edit/${id}`}><FilePenLine/></Link>
             </Button>
             {loading ? 
-                <Button disabled={loading} variant="destructive">Deleting</Button>
+                <Button disabled={loading} variant="destructive">Deleting...</Button>
                  :
                 <Button onClick={handleDelete} disabled={loading} variant="destructive" size="icon"><Trash2/></Button>
             }

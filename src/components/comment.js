@@ -1,5 +1,5 @@
 "use client"
-
+import { useCallback, useState, useOptimistic, startTransition } from "react";
 import { AiFillHeart, AiOutlineHeart, AiOutlineComment, AiTwotoneCalendar } from "react-icons/ai";
 import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,17 +7,22 @@ import { Textarea } from "@/components/ui/textarea"
 import { useSession } from "next-auth/react";
 import avatar from "../../public/img/avatar.png"
 import Image from "next/image";
-import { useCallback, useState } from "react";
 import { addComment, deleteComment, likeBlog } from "@/server-actions/action.blog";
 
 export default function Comment({blogId, blogData}){
     const {data:session, status} = useSession()
     const [likes, setLikes] = useState(blogData?.likes)
     const [comments, setComments] = useState(blogData?.comments)
+    const [isCommentDeleting, setIsCommentDeleting] = useState(false)
     const [commentText, setCommentText] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
+
+    const [optimisticComments, addOptimisticComments] = useOptimistic(
+        comments,
+        (state, newComment) => [newComment, ...state]
+    )
 
     
     const handleLike = useCallback(async ()=>{
@@ -48,6 +53,17 @@ export default function Comment({blogId, blogData}){
             setLoading(false)
             return
         }
+
+        startTransition(()=>{
+            addOptimisticComments({
+                _id: Date.now(),
+                text: commentText,
+                user: {
+                    _id: session?.user?._id,
+                    name: session?.user?.name
+                }
+            })
+        })
         
         try{
             const res = await addComment(blogId.slug, {text:commentText}, session?.user?.accessToken)
@@ -74,7 +90,8 @@ export default function Comment({blogId, blogData}){
         }
     }, [blogId.slug, session?.user?.accessToken, commentText]);
 
-    const hendleDeleteComment = useCallback(async (commentId)=>{
+    const hendleDeleteComment = async (commentId)=>{
+        setIsCommentDeleting(true)
         try {
             let res = await deleteComment(blogId.slug, {postId: blogId?.slug, commentId: commentId}, session?.user?.accessToken)
             if (res?.status === 200) {
@@ -88,40 +105,42 @@ export default function Comment({blogId, blogData}){
             console.error("Error deleting comment:", err);
             setError(err.message || "Something went wrong while deleting the comment.");
             return;
+        } finally{
+            setIsCommentDeleting(false)
         }
-    }, [blogId.slug, session?.user?.accessToken]);
+    };
 
     return(
         <div className="">
            <div className="py-12">
-            <div className="flex gap-10 items-center text-xl justify-center">
-                <div className="flex items-center gap-1">
-                    <p>{likes?.length}</p>
+                <div className="flex gap-10 items-center text-xl justify-center">
+                    <div className="flex items-center gap-1">
+                        <p>{likes?.length}</p>
 
-                    {likes?.length ? (
-                    <AiFillHeart
-                        onClick={handleLike}
-                        size={20}
-                        color="#ed5784"
-                        cursor="pointer"
-                    />
-                    ) : (
-                    <AiOutlineHeart onClick={handleLike} size={20} cursor="pointer" />
-                    )}
-                </div>
+                        {likes?.length ? (
+                        <AiFillHeart
+                            onClick={handleLike}
+                            size={20}
+                            color="#ed5784"
+                            cursor="pointer"
+                        />
+                        ) : (
+                        <AiOutlineHeart onClick={handleLike} size={20} cursor="pointer" />
+                        )}
+                    </div>
 
-                <div className="flex items-center gap-1">
-                    <p>{comments && comments?.length}</p>
+                    <div className="flex items-center gap-1">
+                        <p>{comments && comments?.length}</p>
 
-                    <AiOutlineComment size={20} />
+                        <AiOutlineComment size={20} />
+                    </div>
                 </div>
             </div>
-        </div>
 
         <div>
             
             {!session?.user && (
-            <h3 className="text-red-500">Kindly login to leave a comment.</h3>
+                <h3 className="text-red-500">Kindly login to leave a comment.</h3>
             )}
 
             {session?.user && (
@@ -151,9 +170,10 @@ export default function Comment({blogId, blogData}){
                 </div>
             )}
 
-            {comments && !!comments.length && ( 
+            {console.log('optimisticCommentsnew', optimisticComments)}
+            {optimisticComments && !!optimisticComments.length && ( 
             <>
-                {comments?.map((comment) => (
+                {optimisticComments?.map((comment) => (
                 <div key={comment._id} className="flex gap-3 py-5 items-center">
                     <Image
                     src={comment?.user?.avatar?.url || avatar}
@@ -169,11 +189,15 @@ export default function Comment({blogId, blogData}){
                     </div>
 
                     {session?.user?._id === comment?.user?._id && (
-                        <Trash2
+                        <button className={`ml-10 ${isCommentDeleting ? 'opacity-50' : ''}`}
+                            disabled={isCommentDeleting}
                             onClick={() => hendleDeleteComment(comment?._id)}
-                            cursor="pointer"
-                            className="text-red-500 ml-10"
-                        />
+                        >
+                            <Trash2
+                                cursor="pointer"
+                                className={`text-red-500`}
+                            />
+                        </button>
                     )}
 
                 </div>

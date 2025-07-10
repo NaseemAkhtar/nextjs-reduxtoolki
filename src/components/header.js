@@ -38,6 +38,7 @@ export async function Header(){
     const serverSession = await getServerSession(options)
     let user
     if(serverSession?.user){
+        console.log('serverSession header>>>>>', serverSession)
         let res = await userRepo(serverSession)
         user = res?.data?.data
         

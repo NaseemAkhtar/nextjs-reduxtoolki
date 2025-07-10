@@ -3,6 +3,7 @@ import { connect } from "@/db";
 import { verifyJwtToken } from "@/lib/jwt";
 import { Blog } from "@/models/blog.model";
 import { User } from "@/models/user.model";
+import mongoose from "mongoose";
 
 
 export const createPost = async (body, accessToken)=>{
@@ -98,33 +99,159 @@ export const getBlogBySlug = async (slug) => {
         } else {
             newSlug._id = slug
         }
-        
-        let blog = await Blog.findOne(newSlug).populate({
-            path: "authorId",
-            select: "-password"
-        })
-        .populate({
-            path: "comments.user",
-            select: "-password"
-        })
 
-        let serializedBlog = JSON.parse(JSON.stringify(blog))
+        // Aggrigation pipeline start here
+        const matchStage = {};
 
-        if(!blog){
+        if (slug.includes("-")) {
+            matchStage.slug = slug;
+        } else {
+        // Make sure it's an ObjectId if using _id
+            matchStage._id = new mongoose.Types.ObjectId(slug);
+        }
+
+        const pipeline = [
+            { $match: matchStage },
+
+            // Lookup author
+            {
+                $lookup: {
+                from: "users",
+                localField: "authorId",
+                foreignField: "_id",
+                as: "authorId",
+                },
+            },
+            {
+                $unwind: "$authorId",
+            },
+            {
+                $project: {
+                "authorId.password": 0,
+                "authorId.email": 0,
+                "authorId.isAdmin": 0,
+                "authorId.age": 0,
+                "authorId.location": 0,
+                "authorId.about": 0,
+                "authorId.__v": 0,
+                },
+            },
+
+            // Lookup comments.user
+            {
+                $unwind: {
+                path: "$comments",
+                preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                from: "users",
+                localField: "comments.user",
+                foreignField: "_id",
+                as: "comments.user",
+                },
+            },
+            {
+                $unwind: {
+                path: "$comments.user",
+                preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $project: {
+                    "comments.user.password": 0,
+                },
+            },
+
+            // Group back to array & sort comments by date DESC
+            {
+                $group: {
+                _id: "$_id",
+                doc: { $first: "$$ROOT" },
+                comments: { $push: "$comments" },
+                },
+            },
+            {
+                $addFields: {
+                "doc.comments": {
+                    $filter: {
+                    input: "$comments",
+                    as: "comment",
+                    cond: { $ne: ["$$comment", {}] },
+                    },
+                },
+                },
+            },
+            {
+                $addFields: {
+                "doc.comments": {
+                    $sortArray: {
+                    input: "$doc.comments",
+                    sortBy: { date: -1 },
+                    },
+                },
+                },
+            },
+            {
+                $replaceRoot: {
+                newRoot: "$doc",
+                },
+            }
+        ];
+
+        let result = await Blog.aggregate(pipeline);
+
+        if (!result.length) {
             return {
                 message: "Blog does not exist",
                 status: 404,
                 success: false,
-                data: []
-            }
+                data: [],
+            };
         }
+        console.log('aggrigation raw data>>>>>>>>>>hhhhh', JSON.parse(JSON.stringify(result[0])))
 
         return {
             message: "Blog fetched successfully",
             success: true,
             status: 200,
-            data: serializedBlog
-        }
+            data: JSON.parse(JSON.stringify(result[0])),
+        };
+
+        
+        // let blog = await Blog.findOne(newSlug).populate({
+        //     path: "authorId",
+        //     select: "-password"
+        // })
+        // .populate({
+        //     path: "comments.user",
+        //     select: "-password"
+        // })
+        // .sort({createdAt: -1})
+        // .lean()
+
+        // if (blog.comments && blog.comments.length) {
+        //     blog.comments.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // }
+
+        // let serializedBlog = JSON.parse(JSON.stringify(blog))
+
+        // if(!blog){
+        //     return {
+        //         message: "Blog does not exist",
+        //         status: 404,
+        //         success: false,
+        //         data: []
+        //     }
+        // }
+
+        // return {
+        //     message: "Blog fetched successfully",
+        //     success: true,
+        //     status: 200,
+        //     data: serializedBlog
+        // }
 
     } catch(err){
         console.error("Error fetching blog:", err)

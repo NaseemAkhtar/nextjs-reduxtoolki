@@ -15,7 +15,7 @@ export const userRepo = async (data)=>{
         return response
     } catch(err){
         console.error('Error in userRepo:', err);
-        // throw new Error('Failed to fetch user data');
+        throw err
     }
 }
 

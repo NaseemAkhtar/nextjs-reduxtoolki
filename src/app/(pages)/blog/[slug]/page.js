@@ -42,7 +42,7 @@ export default async function Blog({params}){
                     <h2 className="mb-2">{blog?.title}</h2>
                     <p className="mb-3">{blog?.excerpt}</p>
                     
-                    <div className="author flex flex-row justify-center gap-3">
+                    <div className="author flex flex-row justify-center items-center gap-3">
                         <Image 
                             src={blog?.authorId?.avatar?.url || avatar}
                             alt="Avatar"
@@ -50,7 +50,7 @@ export default async function Blog({params}){
                             width={40}
                             className="w-10 h-10 rounded-full cursor-pointer"
                         />
-                        <div className="text-xs">
+                        <div className="text-xs text-left">
                             <h6>{blog?.authorId?.name}</h6>
                             <p>{blog?.authorId?.designation}</p>
                         </div>

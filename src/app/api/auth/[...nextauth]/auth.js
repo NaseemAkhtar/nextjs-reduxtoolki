@@ -3,10 +3,36 @@ import { connect } from "@/db";
 import { User } from "@/models/user.model";
 import CredentialProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs";
-import { signJwtToken } from "@/lib/jwt";
-import { use } from "react";
+import { signJwtToken, verifyJwtToken } from "@/lib/jwt";
 
+async function refreshAccessToken(token) {
+  try {
+    const verified = verifyJwtToken(token.refreshToken);
 
+    if (!verified) {
+      throw new Error("Invalid refresh token");
+    }
+
+    // If valid, issue new access token
+    const accessToken = signJwtToken(
+      { _id: verified._id, email: verified.email },
+      { expiresIn: "2m" }
+    );
+
+    return {
+      ...token,
+      accessToken,
+      accessTokenExpires: Date.now() + 2 * 60 * 1000,
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
 
 export const options = {
     providers: [
@@ -30,7 +56,6 @@ export const options = {
                 if(!email || !password) {
                     throw new Error({cause: "Please provide email and password"})
                 }
-
                 try{
                     await connect()
                     const user = await User.findOne({email}).select('+password')
@@ -38,17 +63,32 @@ export const options = {
                     if(!user){
                         throw new Error({cause: "Please provide valid email and password"})
                     }
-
-                    const isPasswordMatch = await compare(password, user.password)
+                    
+                    const isPasswordMatch = await compare(credentials.password, user.password)
                     
                     if(!isPasswordMatch){
                         throw new Error({cause: "Please provide correct password"})
-                    } else {
-                        const {password, ...currentUser} = user._doc
-                        console.log(user, 'login succesfuly???? ', currentUser)
-                        const accessToken = signJwtToken(currentUser, {expiresIn: "7d"})
+                    }  
+                    // else {
+                    //         // const {password, ...currentUser} = user._doc
+                    //         // const accessToken = signJwtToken(currentUser, {expiresIn: "7d"})
                         
-                        return {...currentUser,accessToken}
+                    //         // return {...currentUser,accessToken}
+                            
+                    //     }
+                    // const {password, ...currentUser} = user._doc
+                    const currentUser = user.toObject();
+                    delete currentUser.password;
+                    const accessToken = signJwtToken(currentUser, { expiresIn: "2m" });
+                    const refreshToken = signJwtToken(currentUser, { expiresIn: "7d" });
+                    
+                console.log('check refresh token>>>>>>>>>>>.....', {refreshToken,
+                        accessTokenExpires: new Date.now() + 2 * 60 * 1000})
+                    return {
+                        ...currentUser,
+                        accessToken,
+                        refreshToken,
+                        accessTokenExpires: new Date.now() + 2 * 60 * 1000
                     }
                 } catch(err){
                     throw new Error({cause: "Invalid password"})
@@ -60,16 +100,27 @@ export const options = {
         async jwt({token, user}){
             if(user){
                 token.accessToken = user.accessToken
+                token.refreshToken = user.refreshToken
+                token.accessTokenExpires = user.accessTokenExpires
                 token._id = user._id
                 token.name = user.name
             }
-            return token
+            if(Date.now() < token.accessTokenExpires){
+                console.log('Date.now() < token.accessTokenExpires..', Date.now() < token.accessTokenExpires)
+                return token
+            }
+            
+            console.log('Request for refresh token>>>>>>..')
+            //If accessToken has expired try to reresh token
+            return await refreshAccessToken(token)
         },
         async session({session, token}){
             if(token){
                 session.user._id = token._id,
                 session.user.accessToken = token.accessToken
+                session.user.refreshToken = token.refreshToken
                 session.user.name = token.name
+                session.user.error = token.error
             }
             return session
         }
@@ -78,7 +129,7 @@ export const options = {
         signIn: "/login"
     },
     session: {
-        strategy: "jwt"
+        strategy: "jwt",
         // jwt: true,
     },
     secret: process.env.TOKEN_SECRET

@@ -11,19 +11,32 @@ export async function GET(req, res){
         // let url = await req?.url
         // let query = new URL(url)
         const accessToken = req.headers.get("authorization")
+        if(!accessToken){
+            return NextResponse.json({
+                message: "Access token is required",
+                success: false
+            },{status:400})
+        }
         const token = accessToken?.split(" ")[1]
 
         const verifyToken =  verifyJwtToken(token)
+        if(!verifyToken || !verifyToken?._id){
+            return NextResponse.json({
+                message: "Unauthorized (wrong or expired token)",
+                success: false
+            },{status:401})
+        }
+
         // const session = await getServerSession(options);
         // console.log("session route......??? new",  verifyToken)
         // console.log(session.user,"Req params.....", query?.searchParams.get('uid'))
-        const user = await User.findOne({_id:verifyToken?._id}).select("-password")
-       
+        // const user = await User.findOne({_id:verifyToken?._id}).select("-password")
+        const user = await User.findById(verifyToken._id).select("-password -__v").lean();
         if(!user){
             return NextResponse.json({
                 success: false,
                 message: "Your are not loggedin"
-            },{status:400})
+            },{status:404})
         }
         return NextResponse.json({
             success: true,

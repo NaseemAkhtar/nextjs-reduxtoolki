@@ -174,13 +174,13 @@ export default function Comment({blogId, blogData}){
             {optimisticComments && !!optimisticComments.length && ( 
             <>
                 {optimisticComments?.map((comment) => (
-                <div key={comment._id} className="flex gap-3 py-5 items-center">
+                <div key={comment._id} className="flex gap-3 py-5 items-top">
                     <Image
-                    src={comment?.user?.avatar?.url || avatar}
-                    alt="avatar image"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full"
+                        src={comment?.user?.avatar?.url || avatar}
+                        alt="avatar image"
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full shrink-0"
                     />
 
                     <div>
@@ -189,7 +189,7 @@ export default function Comment({blogId, blogData}){
                     </div>
 
                     {session?.user?._id === comment?.user?._id && (
-                        <button className={`ml-10 ${isCommentDeleting ? 'opacity-50' : ''}`}
+                        <button className={`ml-10 shrink-0 ${isCommentDeleting ? 'opacity-50' : ''}`}
                             disabled={isCommentDeleting}
                             onClick={() => hendleDeleteComment(comment?._id)}
                         >

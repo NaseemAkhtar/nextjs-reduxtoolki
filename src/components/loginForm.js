@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 
 
 export default function LoginForm(){
-    const [hydrate, setHydrate] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const router = useRouter();
@@ -23,21 +22,17 @@ export default function LoginForm(){
     // }
 
 
-    useEffect(()=>{
-        setHydrate(true)
-    },[])
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if(!e.target.email.value, !e.target.password.value){
+        if(!e.target.email.value && !e.target.password.value){
             setError("All fields are required")
             return null
         }
         
         try{
             setLoading(true)
-            signIn("credentials", { email:e.target.email.value, password:e.target.password.value, redirect: false }).then( async(e)=>{
-                if(e.error){
+            signIn("credentials", { email:e.target.email.value, password:e.target.password.value, redirect: false }).then( async(res)=>{
+                if(res.error){
                     setError("Invalid email/password")
                     setLoading(false)
                 } else{
@@ -48,14 +43,9 @@ export default function LoginForm(){
             setError(err)
             setLoading(false)
         } finally{
-            setError("")
         }
       };
-
-      if(!hydrate){
-        return null
-      }
-
+console.log('setError', error)
     return(
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input 

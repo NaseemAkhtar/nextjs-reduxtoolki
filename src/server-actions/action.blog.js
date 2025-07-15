@@ -1,6 +1,7 @@
 'use server'
 import { connect } from "@/db";
 import { verifyJwtToken } from "@/lib/jwt";
+import { serializeDoc } from "@/lib/utils";
 import { Blog } from "@/models/blog.model";
 import { User } from "@/models/user.model";
 import mongoose from "mongoose";
@@ -210,13 +211,12 @@ export const getBlogBySlug = async (slug) => {
                 data: [],
             };
         }
-        console.log('aggrigation raw data>>>>>>>>>>hhhhh', JSON.parse(JSON.stringify(result[0])))
-
+        
         return {
             message: "Blog fetched successfully",
             success: true,
             status: 200,
-            data: JSON.parse(JSON.stringify(result[0])),
+            data: serializeDoc(result[0])//JSON.parse(JSON.stringify(result[0])),
         };
 
         
@@ -311,7 +311,7 @@ export const updateBlog = async (slug, body, accessToken) => {
             success: true,
             message: "Blog updated successfully",
             status: 200,
-            data: JSON.parse(JSON.stringify(updatedBlog))
+            data: serializeDoc(updateBlog)//JSON.parse(JSON.stringify(updatedBlog))
         }   
     } catch(err){
         console.error("Error updating blog:", err)
@@ -432,7 +432,7 @@ export const addComment = async (slug, body, accessToken) => {
                 success: false
             }
         }   
-        const serializedComment = JSON.parse(JSON.stringify(comment.comments.at(-1)))
+        const serializedComment = serializeDoc(comment.comments.at(-1))//JSON.parse(JSON.stringify(comment.comments.at(-1)))
         return {
             message: "Comment added successfully",
             status: 201,
@@ -563,7 +563,7 @@ export const likeBlog = async (slug, accessToken) => {
             message: "Blog liked/unliked successfully",
             status: 200,
             success: true,
-            likes: JSON.parse(JSON.stringify(blog.likes))
+            likes: serializeDoc(blog.likes)//JSON.parse(JSON.stringify(blog.likes))
         }
 
     } catch(err){

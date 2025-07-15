@@ -13,7 +13,6 @@ import LoginForm from "@/components/loginForm"
 
 export default async function Login(){
     const serverSession = await getServerSession(options)
-    console.log('serverSession in login page', serverSession)
      
     return(
     <div className="naseem flex justify-center">

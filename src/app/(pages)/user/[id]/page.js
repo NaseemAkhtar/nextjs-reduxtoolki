@@ -17,10 +17,9 @@ export default async function Profile(){
             getUser(session?.user?.accessToken),
             getUseBlogs(session?.user?._id)
         ])
+        
         user = userData?.data || {}
         blogData = userBlog?.data || []
-
-        console.log("blogData>>>>>>>.", user)
     }
     
     return (<>

@@ -1,6 +1,7 @@
 'use server'
 import { connect } from "@/db";
 import { verifyJwtToken } from "@/lib/jwt";
+import { serializeDoc } from "@/lib/utils";
 import { Blog } from "@/models/blog.model";
 import { User } from "@/models/user.model";
 
@@ -20,7 +21,7 @@ export const getUser = async (accessToken) => {
     if(!verifyToken || !verifyToken?._id){
         return {
             message: "Unauthorized (wrong or expired token)",
-            status: 403,
+            status: 401,
             success: false
         }
     }
@@ -39,12 +40,13 @@ export const getUser = async (accessToken) => {
         // If user is found, return the user data
         return {
             message: "User fetched successfully",
-            data: {
-                ...user,
-                _id: user._id.toString(),
-                createdAt: user.createdAt?.toISOString(),
-                updatedAt: user.updatedAt?.toISOString(),
-            },
+            // data: {
+            //     ...user,
+            //     _id: user._id.toString(),
+            //     createdAt: user.createdAt?.toISOString(),
+            //     updatedAt: user.updatedAt?.toISOString(),
+            // },
+            data: serializeDoc(user),
             status: 200,
             success: true
         };
@@ -86,17 +88,10 @@ export const getUseBlogs = async (authorId) => {
         }
 
         // If blogs are found, it will return a 200 status with the blogs data.
-        // Serialize to make it safe for Next.js
-        const serializedBlogs = blogs.map((blog) => ({
-        ...blog,
-        _id: blog._id.toString(),
-        createdAt: blog.createdAt?.toISOString(),
-        updatedAt: blog.updatedAt?.toISOString(),
-        }));
 
         return {
             message: "User blogs fetched successfully",
-            data: serializedBlogs, //JSON.parse(JSON.stringify(blogs)), // Convert to JSON to remove Mongoose document methods
+            data: serializeDoc(blogs), //JSON.parse(JSON.stringify(blogs)), // Convert to JSON to remove Mongoose document methods
             status: 200,
             success: true
         };
@@ -156,12 +151,13 @@ export const updateUserProfile = async (accessToken, body) => {
 
         return {
             message: "Profile updated successfully",
-            data: {
-                ...updatedUser,
-                _id: updatedUser._id.toString(),
-                createdAt: updatedUser.createdAt?.toISOString(),
-                updatedAt: updatedUser.updatedAt?.toISOString(),
-            },
+            // data: {
+            //     ...updatedUser,
+            //     _id: updatedUser._id.toString(),
+            //     createdAt: updatedUser.createdAt?.toISOString(),
+            //     updatedAt: updatedUser.updatedAt?.toISOString(),
+            // },
+            data: serializeDoc(updatedUser),
             status: 200,
             success: true
         };

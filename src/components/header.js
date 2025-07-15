@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import axios from "axios";
 import dynamic from 'next/dynamic';
@@ -32,18 +31,20 @@ const LogoutButton = dynamic(() => import('@/components/logoutButton'), {
     ssr: false
 })
 
-
-
 export async function Header(){
     const serverSession = await getServerSession(options)
-    let user
+    let user = {}
     if(serverSession?.user){
-        console.log('serverSession header>>>>>', serverSession)
+        // console.log('serverSession header>>>>>', serverSession)
         let res = await userRepo(serverSession)
+        if(res.status === 401){
+            console.log('res?.data.....repo status', res.status)
+        }
+        console.log('res?.data.....repo status new', res?.data?.data)
         user = res?.data?.data
         
-        await store.dispatch(fetchUser(user))
-        //response.data?.data
+        // await store.dispatch(fetchUser(user))
+        // response.data?.data
         // console.log('serverSession......',serverSession)
         //   await store.dispatch(user.data?.data)
         //   user = store.getState()

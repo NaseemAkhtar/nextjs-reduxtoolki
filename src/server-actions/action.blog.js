@@ -162,6 +162,13 @@ export const getBlogBySlug = async (slug) => {
             {
                 $project: {
                     "comments.user.password": 0,
+                    "comments.user.isAdmin": 0,
+                    "comments.user.email": 0,
+                    "comments.user.designation": 0,
+                    "comments.user.age": 0,
+                    "comments.user.location": 0,
+                    "comments.user.about": 0,
+                    "comments.user.__v": 0,
                 },
             },
 
@@ -211,12 +218,14 @@ export const getBlogBySlug = async (slug) => {
                 data: [],
             };
         }
-        
+
+        let serial = serializeDoc(result[0])
+
         return {
             message: "Blog fetched successfully",
             success: true,
             status: 200,
-            data: serializeDoc(result[0])//JSON.parse(JSON.stringify(result[0])),
+            data: serial//JSON.parse(JSON.stringify(result[0])),
         };
 
         
@@ -432,12 +441,13 @@ export const addComment = async (slug, body, accessToken) => {
                 success: false
             }
         }   
-        const serializedComment = serializeDoc(comment.comments.at(-1))//JSON.parse(JSON.stringify(comment.comments.at(-1)))
+        
+        // const serializedComment = serializeDoc(comment.comments.at(-1))
         return {
-            message: "Comment added successfully",
+            message: "Comment added successfully.",
             status: 201,
             success: true,
-            data: serializedComment
+            data: JSON.parse(JSON.stringify(comment.comments.at(-1)))
         }
 
     } catch(err){

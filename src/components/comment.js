@@ -12,7 +12,7 @@ import { addComment, deleteComment, likeBlog } from "@/server-actions/action.blo
 export default function Comment({blogId, blogData}){
     const {data:session, status} = useSession()
     const [likes, setLikes] = useState(blogData?.likes)
-    const [comments, setComments] = useState(blogData?.comments)
+    const [comments, setComments] = useState(blogData?.comments || [])
     const [isCommentDeleting, setIsCommentDeleting] = useState(false)
     const [commentText, setCommentText] = useState("")
     const [loading, setLoading] = useState(false)
@@ -23,7 +23,6 @@ export default function Comment({blogId, blogData}){
         comments,
         (state, newComment) => [newComment, ...state]
     )
-
     
     const handleLike = useCallback(async ()=>{
         if(!session?.user) {
@@ -68,9 +67,9 @@ export default function Comment({blogId, blogData}){
         try{
             const res = await addComment(blogId.slug, {text:commentText}, session?.user?.accessToken)
             if (res?.status === 201) {
-                setSuccess("Blog Addes successfully!");
                 setComments(prev => [res?.data, ...prev])
                 setCommentText("")
+                setSuccess("Blog Added successfully!")
             } else {
                 setError(res?.data?.message || "An unexpected error occurred.");
             }
@@ -170,7 +169,6 @@ export default function Comment({blogId, blogData}){
                 </div>
             )}
 
-            {console.log('optimisticCommentsnew', optimisticComments)}
             {optimisticComments && !!optimisticComments.length && ( 
             <>
                 {optimisticComments?.map((comment) => (

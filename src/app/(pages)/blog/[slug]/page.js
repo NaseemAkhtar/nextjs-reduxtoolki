@@ -8,6 +8,11 @@ import Comment from "@/components/comment";
 import { getBlogBySlug } from "@/server-actions/action.blog";
 import avatar from "../../../../../public/img/avatar.png"
 import "../blog.css"
+import dynamic from "next/dynamic";
+
+// const Comment = dynamic(() => import('@/components/comment'), {
+//     ssr: false
+// })
 
 // export const dynamic = "force-dynamic";
 

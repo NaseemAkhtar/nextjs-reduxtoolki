@@ -37,31 +37,34 @@ export async function uploadPhoto(photo){
 }
 
 export function serializeDoc(doc) {
+  let seen = new WeakSet()
   if (doc == null) return doc;
 
-  // If it's an array, serialize each item
+  if (typeof doc !== 'object') return doc;
+
+  if (seen.has(doc)) {
+    // Stop infinite recursion for circular refs
+    return undefined;
+  }
+
+  seen.add(doc);
+
   if (Array.isArray(doc)) {
-    return doc.map(serializeDoc);
+    return doc.map((item) => serializeDoc(item));
   }
 
-  // If it's an object
-  if (typeof doc === 'object') {
-    const serialized= {};
-
-    for (const [key, value] of Object.entries(doc)) {
-      if (key === '_id' && value && typeof value === 'object' && value.toString) {
-        serialized._id = value.toString();
-      } else if (value instanceof Date) {
-        serialized[key] = value.toISOString();
-      } else if (typeof value === 'object') {
-        serialized[key] = serializeDoc(value);
-      } else {
-        serialized[key] = value;
-      }
+  const serialized = {};
+  for (const [key, value] of Object.entries(doc)) {
+    if (key === '_id' && value && typeof value === 'object' && value.toString) {
+      serialized._id = value.toString();
+    } else if (value instanceof Date) {
+      serialized[key] = value.toISOString();
+    } else if (typeof value === 'object') {
+      serialized[key] = serializeDoc(value);
+    } else {
+      serialized[key] = value;
     }
-
-    return serialized;
   }
 
-  return doc;
+  return serialized;
 }

@@ -16,13 +16,13 @@ async function refreshAccessToken(token) {
     // If valid, issue new access token
     const accessToken = signJwtToken(
       { _id: verified._id, email: verified.email },
-      { expiresIn: "2m" }
+      { expiresIn: "10m" }
     );
 
     return {
       ...token,
       accessToken,
-      accessTokenExpires: Date.now() + 2 * 60 * 1000,
+      accessTokenExpires: Date.now() + 10 * 60 * 1000,
     };
   } catch (error) {
     console.error("Error refreshing access token:", error);
@@ -70,25 +70,23 @@ export const options = {
                         throw new Error({cause: "Please provide correct password"})
                     }  
                     // else {
-                    //         // const {password, ...currentUser} = user._doc
-                    //         // const accessToken = signJwtToken(currentUser, {expiresIn: "7d"})
+                        //         // const {password, ...currentUser} = user._doc
+                        //         // const accessToken = signJwtToken(currentUser, {expiresIn: "7d"})
                         
-                    //         // return {...currentUser,accessToken}
-                            
-                    //     }
-                    // const {password, ...currentUser} = user._doc
+                        //         // return {...currentUser,accessToken}
+                        
+                        //     }
+                        // const {password, ...currentUser} = user._doc
                     const currentUser = user.toObject();
                     delete currentUser.password;
-                    const accessToken = signJwtToken(currentUser, { expiresIn: "2m" });
+                    const accessToken = signJwtToken(currentUser, { expiresIn: "10m" });
                     const refreshToken = signJwtToken(currentUser, { expiresIn: "7d" });
                     
-                console.log('check refresh token>>>>>>>>>>>.....', {refreshToken,
-                        accessTokenExpires: new Date.now() + 2 * 60 * 1000})
                     return {
                         ...currentUser,
                         accessToken,
                         refreshToken,
-                        accessTokenExpires: new Date.now() + 2 * 60 * 1000
+                        accessTokenExpires: Date.now() + 10 * 60 * 1000
                     }
                 } catch(err){
                     throw new Error({cause: "Invalid password"})
@@ -98,6 +96,7 @@ export const options = {
     ],
     callbacks: {
         async jwt({token, user}){
+            console.log('check refresh token>>>>>>>>>>>.....new', {token})
             if(user){
                 token.accessToken = user.accessToken
                 token.refreshToken = user.refreshToken
@@ -110,11 +109,12 @@ export const options = {
                 return token
             }
             
-            console.log('Request for refresh token>>>>>>..')
+            console.log('Request for refresh token>>>>>>..', token)
             //If accessToken has expired try to reresh token
             return await refreshAccessToken(token)
         },
         async session({session, token}){
+            console.log('session token>>>>>>..', token)
             if(token){
                 session.user._id = token._id,
                 session.user.accessToken = token.accessToken

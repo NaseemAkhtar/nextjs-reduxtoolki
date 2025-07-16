@@ -32,11 +32,13 @@ export default function LoginForm(){
         try{
             setLoading(true)
             signIn("credentials", { email:e.target.email.value, password:e.target.password.value, redirect: false }).then( async(res)=>{
+                console.log('login....', res.error)
                 if(res.error){
-                    setError("Invalid email/password")
+                    setError("Invalid email/password..")
                     setLoading(false)
                 } else{
-                    router.push("/");
+                    router.push("/blog");
+                    router.refresh()
                 }
             })
         } catch(err){

@@ -25,7 +25,7 @@ import {
  
 import { getServerSession } from "next-auth";
 import { options } from "@/app/api/auth/[...nextauth]/auth";
-import { store } from "@/store/store"; 
+// import { store } from "@/store/store"; 
 import { fetchUser, userRepo } from "@/store/slice/user.slice";
 const LogoutButton = dynamic(() => import('@/components/logoutButton'), {
     ssr: false
@@ -36,12 +36,17 @@ export async function Header(){
     let user = {}
     if(serverSession?.user){
         // console.log('serverSession header>>>>>', serverSession)
-        let res = await userRepo(serverSession)
-        if(res.status === 401){
-            console.log('res?.data.....repo status', res.status)
+        try{
+            let res = await userRepo(serverSession)
+            if(res.status === 401){
+                console.log('res?.data.....repo status', res.status)
+            }
+            console.log('res?.data.....repo status new', res?.data?.data)
+            user = res?.data?.data
+        } catch(err){
+            console.log('USER API CATCH ERROR', err)
         }
-        console.log('res?.data.....repo status new', res?.data?.data)
-        user = res?.data?.data
+        
         
         // await store.dispatch(fetchUser(user))
         // response.data?.data
